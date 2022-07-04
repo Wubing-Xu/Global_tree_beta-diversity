@@ -1,5 +1,5 @@
 # Global_tree_beta-diversity
-This repository contains data and code necessary to reproduce the results shown in the manuscript" Current global tree beta-diversity is shaped by Quaternary climate change".
+This repository contains data and code necessary to reproduce the results shown in the manuscript "Current global tree beta-diversity is shaped by Quaternary climate change".
 
 ## Data
 Tree species occurrences came from Serra-Diaz et al. (2018). These occurrences were compiled from five major comprehensive biodiversity infrastructures, including the [Global Biodiversity Information Facility](https://www.gbif.org), the [Botanical Information and Ecological Network](http://bien.nceas.ucsb.edu/bien), the [Latin American Seasonally Dry Tropical Forest Floristic Network]( http://www.dryflor.info), the [RAINBIO](https://gdauby.github.io/rainbio/index.html) database and the [Atlas of Living Australia](https://www.ala.org.au). All species occurrences have been deposited in the [BIEN](https://bien.nceas.ucsb.edu/bien/) database. 
