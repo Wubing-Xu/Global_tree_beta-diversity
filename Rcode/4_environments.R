@@ -42,6 +42,10 @@ bioc <- stack(bioc_dir)
 lgmc_dir <-paste("data/environment_rasters/LGM_climate/chelsa_LGM_v1_2B_r5m/5min/bio_", c(1,12), ".tif", sep="")
 lgmc <- stack(lgmc_dir)
 
+# Human Modification index
+hmi_dir <- "data/environment_rasters/Global_Human_Modification/gHM/gHM.tif"
+hmi <- stack(hmi_dir)
+
 
 # A function to extract the value of environments for each mypolygon 
 extract_env <- function(env, mypolygon, res, fun=mean, weights=FALSE){
@@ -77,8 +81,14 @@ elev_mean_grid200 <- extract_env(env=elev_5m, mypolygon=grid_land, res=10, fun=m
 colnames(elev_mean_grid200)[2] <- "elevation"
 elev_mean_grid200[, 1] <- grid_land@data[, 1]
 
+# mean HMI for each grid cell
+hmi_10km <- aggregate(hmi, 10)
+hmi_grid <- extract_env(env=hmi_10km, mypolygon=grid_land, res=10, fun=mean)
+colnames(hmi_grid)[2] <- "hmi"
+hmi_grid[, 1] <- grid_land@data[, 1]
 
-save(bioc_grid, lgmc_grid, elev_range_grid200, elev_mean_grid200,
+
+save(bioc_grid, lgmc_grid, elev_range_grid200, elev_mean_grid200, hmi_grid,
      file="intermediate_results/environments_allCells.RDATA")
 load("intermediate_results/environments_allCells.RDATA")
 
@@ -111,7 +121,8 @@ colnames(bioc_grid)[-1] <- paste0("bio_", 1:19)
 env200 <- data.frame(ID = grid_land@data[, 1], 
                      xy, long_lat, bioc_grid[, -1], lgmcc_grid[, -1],
                      elevation = elev_mean_grid200[,-1],
-                     topography = elev_range_grid200[,-1]) %>%
+                     topography = elev_range_grid200[,-1],
+                     hmi = hmi_grid[,-1]) %>%
   as_tibble() %>%
   # remove data of grid-cells with small part in the land
   mutate(land_area = rgeos::gArea(grid_land, byid = TRUE)) %>%
@@ -164,13 +175,13 @@ get_env_nb_summ <- function(envdata = envdata, nbmat = NA, fun){
 
 # mean environmental conditions
 env200_mean_nn8 <- env200_treecell
-env200_mean_nn8[,c(1, 6:28)] <- get_env_nb_summ(envdata = env200_treecell[,c(1, 6:28)], nbmat = nb8mat, fun=mean)
+env200_mean_nn8[,c(1, 6:29)] <- get_env_nb_summ(envdata = env200_treecell[,c(1, 6:29)], nbmat = nb8mat, fun=mean)
 
 env200_mean_nn24 <- env200_treecell
-env200_mean_nn24[,c(1, 6:28)] <- get_env_nb_summ(envdata = env200_treecell[,c(1, 6:28)], nbmat = nb24mat, fun=mean)
+env200_mean_nn24[,c(1, 6:29)] <- get_env_nb_summ(envdata = env200_treecell[,c(1, 6:29)], nbmat = nb24mat, fun=mean)
 
 env200_mean_nn24_all <- env200
-env200_mean_nn24_all[,c(1, 6:28)] <- get_env_nb_summ(envdata = env200[,c(1, 6:28)], nbmat = nb24mat_all, fun=mean)
+env200_mean_nn24_all[,c(1, 6:29)] <- get_env_nb_summ(envdata = env200[,c(1, 6:29)], nbmat = nb24mat_all, fun=mean)
 
 # save all calculated output
 save(env200, env200_mean_nn8, env200_mean_nn24, env200_mean_nn24_all, file = "intermediate_results/environments_final.RDATA")

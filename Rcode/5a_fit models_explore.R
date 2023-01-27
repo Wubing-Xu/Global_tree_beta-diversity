@@ -40,7 +40,7 @@ beta_env <- bind_cols(spesor[, 1:8], phylosor[, 5:8], funcsor[, 5:8]) %>%
   # add environmental variables
   inner_join(env200_mean_nn24 %>% 
                dplyr::select(ID, x, y, longitude, latitude, mat.anomaly, map.anomaly, 
-                             mat = bio_1, map = bio_12, ts = bio_4, ps = bio_15, topo = topography)) %>%
+                             mat = bio_1, map = bio_12, ts = bio_4, ps = bio_15, topo = topography, hmi = hmi)) %>%
   relocate(x, y, longitude, latitude, .after = gamma)
 
 summary(beta_env)
@@ -53,19 +53,20 @@ beta_env <- beta_env %>%
          log_ts = log10(ts),
          log_ps = log10(ps),
          log_map = log10(map),
-         log_topo = log10(topo))
+         log_topo = log10(topo),
+         sqrt_hmi = sqrt(hmi))
 
 beta_env_scale <- beta_env %>% as.data.frame()
-beta_env_scale[,9:34] <- scale(beta_env_scale[,9:34])
+beta_env_scale[,9:36] <- scale(beta_env_scale[,9:36])
 
 
 # Beta deviation from expected using local null model
 betadev_env <- bind_cols(phylosor_devia[, 1:8], funcsor_devia[, 5:8]) %>% 
-  left_join(beta_env %>% dplyr::select(ID, x:latitude, mat.anomaly:log_topo)) %>%
+  left_join(beta_env %>% dplyr::select(ID, x:latitude, mat.anomaly:sqrt_hmi)) %>%
   relocate(x, y, longitude, latitude, .after = gamma)
 
 betadev_env_scale <- betadev_env %>% as.data.frame()
-betadev_env_scale[,9:30] <- scale(betadev_env_scale[,9:30])
+betadev_env_scale[,9:32] <- scale(betadev_env_scale[,9:32])
   
 
 
@@ -116,11 +117,11 @@ par(mfrow=c(2,2)); plot(y1,y2); plot(y1,y3); plot(y1,y4); plot(y2,y4)
 
 # environmental variables
 par(mfrow=c(3,3))
-for (i in 21:28) hist(beta_env[,i], main=colnames(beta_env)[i], cex=0.8)
+for (i in 21:29) hist(beta_env[,i], main=colnames(beta_env)[i], cex=0.8)
 
 par(mfrow=c(3, 3))
-for (i in c(29:34)) hist(beta_env[,i], main=colnames(beta_env)[i], cex=0.8)
-# these variables are right-skewed distributed: mat_anomaly, map_anomaly1, map, topo
+for (i in c(30:36)) hist(beta_env[,i], main=colnames(beta_env)[i], cex=0.8)
+# these variables are right-skewed distributed: mat_anomaly, map_anomaly1, map, topo, hmi
 
 
 ##########
@@ -213,11 +214,23 @@ Assump.Check(x=log10(abs(beta_env[,i])), y=log10(beta_env[,j]))
 Assump.Check(x=log10(abs(beta_env[,i])), y=logit(beta_env[,j]))
 
 
+# check Human Modification Index
+# turnover: weak association; nestedness: weak association; pnest: weak association
+i = 28
+j = 12
+Assump.Check(x = beta_env[,i], y = beta_env[,j])
+Assump.Check(x=beta_env[,i], y=log10(beta_env[,j]))
+Assump.Check(x=beta_env[,i], y=logit(beta_env[,j]))
+Assump.Check(x=sqrt(beta_env[,i]), y=beta_env[,j])
+Assump.Check(x=sqrt(beta_env[,i]), y=log10(beta_env[,j]))
+Assump.Check(x=sqrt(beta_env[,i]), y=logit(beta_env[,j]))
+
+
 ##########
 ## correlations among variables
 library(corrplot)
 
-pre_cor <- cor(beta_env[, c(21:34)])
+pre_cor <- cor(beta_env[, c(21:36)])
 
 # MAT and temperature seasonality are strongly correlated (r = -0.91)
 corrplot(pre_cor, method = 'number') 
@@ -236,78 +249,78 @@ cor(beta_env$mat.anomaly, log(abs(beta_env$map.anomaly)+ 1))
 
 ## species turnover
 lm.spe.turn <- lm(spe.beta.turn ~ mat.anomaly + log_mat.anomaly + map.anomaly + map.anomaly1 + log_map.anomaly + mat + 
-                    map + log_map + ts + log_ts + ps + log_ps + topo + log_topo, data = beta_env)
+                    map + log_map + ts + log_ts + ps + log_ps + topo + log_topo + hmi + sqrt_hmi, data = beta_env)
 summary(lm.spe.turn)
 
 # compare subset models: avoid strongly correlated variables occurred in the same model
-mm.lm.spe.turn <- dredge(lm.spe.turn, rank="AIC", subset = !(mat.anomaly && log_mat.anomaly) & 
+mm.lm.spe.turn <- dredge(lm.spe.turn, rank="AIC", subset = !(mat.anomaly && log_mat.anomaly) & !(hmi && sqrt_hmi) & 
                            !(map.anomaly && log_map.anomaly) & !(map.anomaly1 && log_map.anomaly) & !(map.anomaly && map.anomaly1) &
                            !(map && log_map) & !(ts && log_ts) & !(ps && log_ps) & !(topo && log_topo) & !(mat && ts) & !(mat && log_ts))
 subset(mm.lm.spe.turn, delta < 10)
-# note to choose: mat, log_map, mat.anm, map.anm1 (or map.anm), ts (missing), log_ps, top
+# note to choose: mat, log_map, mat.anm, map.anm1 (or map.anm), ts (missing), log_ps, top, sqrt_hmi
 
 
 ## species nestedness
 lm.spe.nest <- lm(spe.beta.nest ~ mat.anomaly + log_mat.anomaly + map.anomaly + map.anomaly1 + log_map.anomaly + mat + 
-                    map + log_map + ts + log_ts + ps + log_ps + topo + log_topo, data = beta_env)
+                    map + log_map + ts + log_ts + ps + log_ps + topo + log_topo + hmi + sqrt_hmi, data = beta_env)
 summary(lm.spe.nest)
 
-mm.lm.spe.nest <- dredge(lm.spe.nest, rank="AIC", subset = !(mat.anomaly && log_mat.anomaly) & 
+mm.lm.spe.nest <- dredge(lm.spe.nest, rank="AIC", subset = !(mat.anomaly && log_mat.anomaly) & !(hmi && sqrt_hmi) & 
                            !(map.anomaly && log_map.anomaly) & !(map.anomaly1 && log_map.anomaly) & !(map.anomaly && map.anomaly1) &
                            !(map && log_map) & !(ts && log_ts) & !(ps && log_ps) & !(topo && log_topo) & !(mat && ts) & !(mat && log_ts))
 subset(mm.lm.spe.nest, delta < 10)
-# note to choose: mat (missing), map, mat.anm, map.anm1, ts, ps (or log ps), top (or log_top)
+# note to choose: mat (missing), map, mat.anm, map.anm1, ts, ps (or log ps), top (or log_top), hmi (or sqrt_hmi)
 
 
 ## species beta
 lm.spe.total <- lm(spe.beta.total ~ mat.anomaly + log_mat.anomaly + map.anomaly + map.anomaly1 + log_map.anomaly + mat + 
-                     map + log_map + ts + log_ts + ps + log_ps + topo + log_topo, data = beta_env)
+                     map + log_map + ts + log_ts + ps + log_ps + topo + log_topo + hmi + sqrt_hmi, data = beta_env)
 summary(lm.spe.total)
 
-mm.lm.spe.total <- dredge(lm.spe.total, rank="AIC", subset = !(mat.anomaly && log_mat.anomaly) & 
+mm.lm.spe.total <- dredge(lm.spe.total, rank="AIC", subset = !(mat.anomaly && log_mat.anomaly) & !(hmi && sqrt_hmi) & 
                             !(map.anomaly && log_map.anomaly) & !(map.anomaly1 && log_map.anomaly) & !(map.anomaly && map.anomaly1) &
                             !(map && log_map) & !(ts && log_ts) & !(ps && log_ps) & !(topo && log_topo) & !(mat && ts) & !(mat && log_ts))
-subset(mm.lm.spe.total, delta < 10)
-# note to choose: mat, map (or log_map), mat.anm, map.anm, ts (missing), log_ps, top
+subset(mm.lm.spe.total, delta < 20)
+# note to choose: mat, log_map, log_mat.anm, map.anm, ts (missing), log_ps, top, sqrt_hmi
 
 
 ## species proportion of nestedness
 lm.spe.pnest <- lm(spe.pnest ~ mat.anomaly + log_mat.anomaly + map.anomaly + map.anomaly1 + log_map.anomaly + mat + 
-                     map + log_map + ts + log_ts + ps + log_ps + topo + log_topo, data = beta_env)
+                     map + log_map + ts + log_ts + ps + log_ps + topo + log_topo + hmi + sqrt_hmi, data = beta_env)
 summary(lm.spe.pnest)
-mm.lm.spe.pnest <- dredge(lm.spe.pnest,rank="AIC", subset = !(mat.anomaly && log_mat.anomaly) & 
+mm.lm.spe.pnest <- dredge(lm.spe.pnest,rank="AIC", subset = !(mat.anomaly && log_mat.anomaly) & !(hmi && sqrt_hmi) & 
                             !(map.anomaly && log_map.anomaly) & !(map.anomaly1 && log_map.anomaly) & !(map.anomaly && map.anomaly1) &
                             !(map && log_map) & !(ts && log_ts) & !(ps && log_ps) & !(topo && log_topo) & !(mat && ts) & !(mat && log_ts))
 subset(mm.lm.spe.pnest, delta < 10)
-# note to choose: mat or ts, map, mat.anm, map.anm1, ps (or log_ps), log_top (or top)
+# note to choose: mat or ts, map, mat.anm, map.anm1, ps (or log_ps), log_top (or top), hmi (or sqrt_hmi)
 
 
 ## deviation of phylogenetic turnover 
 lm.phylo.turn.dev <- lm(phylo.beta.turn  ~ mat.anomaly + log_mat.anomaly + map.anomaly + map.anomaly1 + log_map.anomaly + mat + 
-                    map + log_map + ts + log_ts + ps + log_ps + topo + log_topo, data = betadev_env)
+                    map + log_map + ts + log_ts + ps + log_ps + topo + log_topo + hmi + sqrt_hmi, data = betadev_env)
 summary(lm.phylo.turn.dev)
 
 # compare subset models: avoid strongly correlated variabels occurred in the same model
-mm.lm.phylo.turn.dev <- dredge(lm.phylo.turn.dev, rank="AIC", subset = !(mat.anomaly && log_mat.anomaly) & 
+mm.lm.phylo.turn.dev <- dredge(lm.phylo.turn.dev, rank="AIC", subset = !(mat.anomaly && log_mat.anomaly) & !(hmi && sqrt_hmi) & 
                                  !(map.anomaly && log_map.anomaly) & !(map.anomaly1 && log_map.anomaly) & !(map.anomaly && map.anomaly1) &
                                  !(map && log_map) & !(ts && log_ts) & !(ps && log_ps) & !(topo && log_topo) & !(mat && ts) & !(mat && log_ts))
 subset(mm.lm.phylo.turn.dev, delta < 10)
-# note to choose: mat, map, mat.anm, log_map.anm (or map.anm), ts (missing), log_ps (or ps), log_top (or top)
+# note to choose: mat, map, mat.anm, log_map.anm (or map.anm), ts (missing), log_ps (or ps), log_top (or top), sqrt_hmi
 
 
 ## deviation of phylogenetic nestedness
 lm.phylo.nest.dev <- lm(phylo.beta.nest  ~ mat.anomaly + log_mat.anomaly + map.anomaly + map.anomaly1 + log_map.anomaly + mat + 
-                          map + log_map + ts + log_ts + ps + log_ps + topo + log_topo, data = betadev_env)
+                          map + log_map + ts + log_ts + ps + log_ps + topo + log_topo + hmi + sqrt_hmi, data = betadev_env)
 summary(lm.phylo.nest.dev)
 
 # compare subset models: avoid strongly correlated variabels occurred in the same model
-mm.lm.phylo.nest.dev <- dredge(lm.phylo.nest.dev, rank="AIC", subset = !(mat.anomaly && log_mat.anomaly) & 
+mm.lm.phylo.nest.dev <- dredge(lm.phylo.nest.dev, rank="AIC", subset = !(mat.anomaly && log_mat.anomaly) & !(hmi && sqrt_hmi) & 
                                  !(map.anomaly && log_map.anomaly) & !(map.anomaly1 && log_map.anomaly) & !(map.anomaly && map.anomaly1) &
                                  !(map && log_map) & !(ts && log_ts) & !(ps && log_ps) & !(topo && log_topo) & !(mat && ts) & !(mat && log_ts))
 subset(mm.lm.phylo.nest.dev, delta < 10)
-# note to choose: ts or mat, log_map, mat.anm, log_map.anm (map.anm1 or ,anm), log_ps (or ps), log_top
+# note to choose: mat, map, mat.anm, log_map.anm (map.anm1 or ,anm), log_ps, log_top, sqrt_hmi
 
-## decision: although the best choice is not-consistent across response variables, the overall best choice is: mat, map, mat_anm, map_anm1, ts, ps, log_topo
+## decision: although the best choice is not-consistent across response variables, the overall best choice is: mat, map, mat_anm, map_anm1, ts, ps, log_topo, sqrt_hmi
 
 
 

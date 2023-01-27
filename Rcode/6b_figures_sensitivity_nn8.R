@@ -105,7 +105,7 @@ tmap_save(beta.maps, file="results/Fig.S_Observed_beta_nn8_maps.png", unit="mm",
 
 
 ####################
-# figure: maps showing patterns of residuals of observed phylogenetic and functional turnover and nestedness from the random expected
+# figure: maps showing patterns of deviations of observed phylogenetic and functional turnover and nestedness from the random expected
 # the values to map 
 beta_dev <- betadev_env[, c(1, 10, 14, 11, 15)] %>%
   as.data.frame()
@@ -114,7 +114,7 @@ beta_dev <- betadev_env[, c(1, 10, 14, 11, 15)] %>%
 #titles <- c(expression("A Deviation of PBD"[turnover]), expression("B Deviation of FBD"[turnover]),
 #             expression("C Deviation of PBD"[nestedness]), expression("D Deviation of FBD"[nestedness]))
 titles <- c("A Deviation of phylogenetic turnover", "B Deviation of functional turnover",
-            "A Deviation of phylogenetic nestedness", "B Deviation of functional nestedness")
+            "C Deviation of phylogenetic nestedness", "D Deviation of functional nestedness")
 
 # generate maps
 beta.dev.maps <- list()
@@ -135,31 +135,31 @@ tmap_save(beta.dev.maps, file="results/Fig.S_Deviation_PBD.FBD_nn8_maps.png", un
 # figure: plots showing standardized coefficients from models regressing beta-diversity variables against environmental variables 
 
 # extract standardized averaged coefficients, their 95% CI and p-values from models
-mmsar_coef_beta.obs <- bind_rows(mm_sar_spe.total[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+mmsar_coef_beta.obs <- bind_rows(mm_sar_spe.total[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
             mutate(beta_facet = "Taxonomic", beta_comp = "Total beta-diversity"),
-          mm_sar_spe.turn[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+          mm_sar_spe.turn[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
             mutate(beta_facet = "Taxonomic", beta_comp = "Turnover"),
-          mm_sar_spe.nest[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+          mm_sar_spe.nest[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
             mutate(beta_facet = "Taxonomic", beta_comp = "Nestedness"),
-          mm_sar_spe.pnest[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+          mm_sar_spe.pnest[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
             mutate(beta_facet = "Taxonomic", beta_comp = "Nestedness proportion "),
           
-          mm_sar_phylo.total[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+          mm_sar_phylo.total[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
             mutate(beta_facet = "Phylogenetic", beta_comp = "Total beta-diversity"),
-          mm_sar_phylo.turn[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+          mm_sar_phylo.turn[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
             mutate(beta_facet = "Phylogenetic", beta_comp = "Turnover"),
-          mm_sar_phylo.nest[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+          mm_sar_phylo.nest[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
             mutate(beta_facet = "Phylogenetic", beta_comp = "Nestedness"),
-          mm_sar_phylo.pnest[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+          mm_sar_phylo.pnest[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
             mutate(beta_facet = "Phylogenetic", beta_comp = "Nestedness proportion "),
           
-          mm_sar_func.total[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+          mm_sar_func.total[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
             mutate(beta_facet = "Functional", beta_comp = "Total beta-diversity"),
-          mm_sar_func.turn[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+          mm_sar_func.turn[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
             mutate(beta_facet = "Functional", beta_comp = "Turnover"),
-          mm_sar_func.nest[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+          mm_sar_func.nest[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
             mutate(beta_facet = "Functional", beta_comp = "Nestedness"),
-          mm_sar_func.pnest[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+          mm_sar_func.pnest[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
             mutate(beta_facet = "Functional", beta_comp = "Nestedness proportion ")
           ) %>%
   as_tibble()
@@ -174,14 +174,15 @@ mmsar_coef_beta.obs <- mmsar_coef_beta.obs %>%
                               variable == "map" ~ "MAP",
                               variable == "ts" ~ "Temperature\nseasonality",
                               variable == "ps" ~ "Precipitation\nseasonality",
-                              variable == "log_topo" ~ "Elevational\nrange"))
+                              variable == "log_topo" ~ "Elevational\nrange", 
+                              variable == "sqrt_hmi" ~ "Human\nmodification"))
 
 # set factor levels
 mmsar_coef_beta.obs <- mmsar_coef_beta.obs %>% 
   mutate(beta_facet = factor(beta_facet, levels = c("Taxonomic", "Phylogenetic", "Functional")),
          beta_comp = factor(beta_comp, levels = c("Total beta-diversity", "Turnover", "Nestedness", "Nestedness proportion ")),
          variable = factor(variable, levels = c("Temperature\nanomaly", "Precipitation\nanomaly", "MAT" ,"MAP", "Temperature\nseasonality", 
-                                                "Precipitation\nseasonality", "Elevational\nrange"))) 
+                                                "Precipitation\nseasonality", "Elevational\nrange", "Human\nmodification"))) 
 
 # shape and colours for components of beta; colours of all components that are not significant are set as gray
 beta_comp_shape <- c("Total beta-diversity" = 21, "Turnover" = 22, "Nestedness" = 23, "Nestedness proportion " = 24)
@@ -237,7 +238,7 @@ plot_coef_obsbeta <- ggplot(mmsar_coef_beta.obs) +
 
 cowplot::plot_grid(plot_coef_obsbeta, plot_grid(NULL, legend_beta_comp, rel_widths =  c(0.15, 1)),
                    nrow = 2,  rel_heights =  c(1, 0.1))
-ggsave(file="results/Fig.S_coefficients_observed_beta_nn8.png", unit="mm",width=150, height=150)
+ggsave(file="results/Fig.S_coefficients_observed_beta_nn8.png", unit="mm",width=180, height=150)
 
 
 ####################
@@ -245,13 +246,13 @@ ggsave(file="results/Fig.S_coefficients_observed_beta_nn8.png", unit="mm",width=
 # turnover and nestedness against environmental variables 
 
 # extract standardized averaged coefficients, their 95% CI and p-values from models
-mmsar_coef_beta.dev <- bind_rows(mm_sar_phylo.dev.turn[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+mmsar_coef_beta.dev <- bind_rows(mm_sar_phylo.dev.turn[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
                                     mutate(beta_facet = "Phylogenetic", beta_comp = "Deviation of turnover"),
-                                  mm_sar_phylo.dev.nest[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+                                  mm_sar_phylo.dev.nest[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
                                     mutate(beta_facet = "Phylogenetic", beta_comp = "Deviation of nestedness"),
-                                  mm_sar_func.dev.turn[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+                                  mm_sar_func.dev.turn[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
                                     mutate(beta_facet = "Functional", beta_comp = "Deviation of turnover"),
-                                  mm_sar_func.dev.nest[[1]][1:7, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
+                                  mm_sar_func.dev.nest[[1]][1:8, c("variable", "coef.avg.cod", "coef_2.5", "coef_97.5", "p.avg.cod")] %>% 
                                     mutate(beta_facet = "Functional", beta_comp = "Deviation of nestedness")) %>% 
   as_tibble()
 
@@ -265,14 +266,15 @@ mmsar_coef_beta.dev <- mmsar_coef_beta.dev %>%
                               variable == "map" ~ "MAP",
                               variable == "ts" ~ "Temperature\nseasonality",
                               variable == "ps" ~ "Precipitation\nseasonality",
-                              variable == "log_topo" ~ "Elevational\nrange"))
+                              variable == "log_topo" ~ "Elevational\nrange", 
+                              variable == "sqrt_hmi" ~ "Human\nmodification"))
 
 # set factor levels
 mmsar_coef_beta.dev <- mmsar_coef_beta.dev %>% 
   mutate(beta_facet = factor(beta_facet, levels = c("Phylogenetic", "Functional")),
          beta_comp = factor(beta_comp, levels = c("Deviation of turnover", "Deviation of nestedness")),
          variable = factor(variable, levels = c("Temperature\nanomaly", "Precipitation\nanomaly", "MAT" ,"MAP", "Temperature\nseasonality", 
-                                                "Precipitation\nseasonality", "Elevational\nrange"))) 
+                                                "Precipitation\nseasonality", "Elevational\nrange", "Human\nmodification"))) 
 
 # shape and colours for components of beta; colours of all components that are not significant are set as gray
 beta_comp_shape <- c("Deviation of turnover" = 22, "Deviation of nestedness" = 23)
@@ -329,5 +331,5 @@ plot_coef_betadev <- ggplot(mmsar_coef_beta.dev) +
 
 cowplot::plot_grid(plot_coef_betadev, plot_grid(NULL, legend_betadev_comp, rel_widths =  c(0.2, 1)),
                    nrow = 2,  rel_heights =  c(1, 0.1))
-ggsave(file="results/Fig.S_coefficients_beta_deviation_nn8.png", unit="mm",width=120, height=120)
+ggsave(file="results/Fig.S_coefficients_beta_deviation_nn8.png", unit="mm",width=127, height=120)
 

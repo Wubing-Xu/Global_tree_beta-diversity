@@ -92,11 +92,22 @@ spp <-  tree_pam6$Species_name[id]
 tree_pam6 <- lets.subsetPAM(tree_pam6, names=spp, remove.cells = TRUE)
 
 
-# Angiosperm species
+# Angiosperm species: 46173 species
 angio_species <- tibble(species = tree_pam6$Spe) %>%
   mutate(species2 = gsub("_"," ", species)) %>%
   left_join(spname, by = c("species2" = "species")) %>%
   filter(class == "Magnoliopsida")
+
+# Gymnosperm species: 579 species
+gymno_species <- tibble(species = tree_pam6$Spe) %>%
+  mutate(species2 = gsub("_"," ", species)) %>%
+  left_join(spname, by = c("species2" = "species")) %>%
+  filter(class != "Magnoliopsida")
+
+
+# extract a subset of gymnosperm species for data checking
+tree_pam6_gymno <- lets.subsetPAM(tree_pam6, names = gymno_species$species, remove.cells = TRUE)
+table(values(tree_pam6_gymno$Rich) >=5) # 999 grid-cells >= 5
 
 # only keep angiosperm species in the species presence/absence matrix
 tree_pam6 <- lets.subsetPAM(tree_pam6, names = angio_species$species, remove.cells = TRUE)
@@ -110,7 +121,7 @@ table(!is.na(values(tree_pam6$Rich))) #TRUE:3098; FALSE:8734
 ## remove grid-cells that are not on mainland
 land_bhm <- spTransform(land, behrmann)
 tree_pam6$Richness_Raster <- mask(tree_pam6$Rich, land_bhm)  #based on mainland
-table(!is.na(values(tree_pam6$Rich))) #FALSE:2319;TRUE:9513
+table(!is.na(values(tree_pam6$Rich))) #TRUE:2319; FALSE:9513
 
 # remove the cells from the presence/absence matrix and species with no occurrences
 id_cell <- rownames(tree_pam6[[1]]) %in% which(!is.na(values(tree_pam6$Rich))) 
@@ -119,6 +130,25 @@ tree_pam6$Presence_and_Absence_Matrix <- tree_pam6$Presence_and_Absence_Matrix[i
 
 # update species names
 tree_pam6$Species_name <- colnames(tree_pam6[[1]])[-c(1:2)]
+
+
+#### same application for the subset of gymnosperm 
+## remove grid-cells with richness < 5
+# the values of raster cells with richness <5 are set as NA 
+tree_pam6_gymno$Richness_Raster[tree_pam6_gymno$Rich<5] <- NA 
+table(!is.na(values(tree_pam6_gymno$Rich))) #TRUE:999; FALSE:10833
+
+## remove grid-cells that are not on mainland
+tree_pam6_gymno$Richness_Raster <- mask(tree_pam6_gymno$Rich, land_bhm)  #based on mainland
+table(!is.na(values(tree_pam6_gymno$Rich))) #FALSE:792;TRUE:11040
+
+# remove the cells from the presence/absence matrix and species with no occurrences
+id_cell <- rownames(tree_pam6_gymno[[1]]) %in% which(!is.na(values(tree_pam6_gymno$Rich))) 
+id_species <- colSums(tree_pam6_gymno[[1]][id_cell, -c(1:2)]) >0
+tree_pam6_gymno$Presence_and_Absence_Matrix <- tree_pam6_gymno$Presence_and_Absence_Matrix[id_cell, c(1, 2, which(id_species) + 2)]
+
+# update species names
+tree_pam6_gymno$Species_name <- colnames(tree_pam6_gymno[[1]])[-c(1:2)]
 
 
 # generate the polygons with grid-cells in land
@@ -134,6 +164,8 @@ grid_land <- crop(grid_world, land_bhm)
 plot(tree_pam6, world=FALSE, axes=FALSE, box=FALSE)
 plot(land_bhm, add=TRUE)
 
+plot(tree_pam6_gymno, world=FALSE, axes=FALSE, box=FALSE)
+plot(land_bhm, add=TRUE)
 
 #Save data
-save(tree_pam6, land_bhm, grid_land, file = "data/tree_pam/tree_pam6_final.RDATA")
+save(tree_pam6, tree_pam6_gymno, land_bhm, grid_land, file = "data/tree_pam/tree_pam6_final.RDATA")

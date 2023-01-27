@@ -32,7 +32,7 @@ trait <- read_delim("data/traits_phylogeny/TC_species_8Traits_mean_final.csv", d
 spname <- read_delim("data/traits_phylogeny/TC_species.family.54020sp.csv", delim = ";")
 
 
-# check species in traits and phylogeny can be matched
+# check whether species in traits and phylogeny can be matched
 id <- tree$tip.label %in% trait[,1]
 table(id)  #All is TRUE
 

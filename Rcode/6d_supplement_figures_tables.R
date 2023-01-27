@@ -212,36 +212,37 @@ dev.off()
 
 
 
+
 ####################
 ## get the importance values (weights), and correlations between environmental variables and observed beta-diversity measures,
 # and show them as a figure and a table 
 
 # extract weights and correlations from model resul tables
-env_impor_beta.obs <- bind_rows(mm_sar_spe.total[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+env_impor_beta.obs <- bind_rows(mm_sar_spe.total[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
             mutate(beta_facet = "Taxonomic", beta_comp = "Total beta-diversity"),
-          mm_sar_spe.turn[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+          mm_sar_spe.turn[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
             mutate(beta_facet = "Taxonomic", beta_comp = "Turnover"),
-          mm_sar_spe.nest[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+          mm_sar_spe.nest[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
             mutate(beta_facet = "Taxonomic", beta_comp = "Nestedness"),
-          mm_sar_spe.pnest[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+          mm_sar_spe.pnest[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
             mutate(beta_facet = "Taxonomic", beta_comp = "Nestedness proportion"),
           
-          mm_sar_phylo.total[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+          mm_sar_phylo.total[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
             mutate(beta_facet = "Phylogenetic", beta_comp = "Total beta-diversity"),
-          mm_sar_phylo.turn[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+          mm_sar_phylo.turn[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
             mutate(beta_facet = "Phylogenetic", beta_comp = "Turnover"),
-          mm_sar_phylo.nest[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+          mm_sar_phylo.nest[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
             mutate(beta_facet = "Phylogenetic", beta_comp = "Nestedness"),
-          mm_sar_phylo.pnest[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+          mm_sar_phylo.pnest[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
             mutate(beta_facet = "Phylogenetic", beta_comp = "Nestedness proportion"),
           
-          mm_sar_func.total[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+          mm_sar_func.total[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
             mutate(beta_facet = "Functional", beta_comp = "Total beta-diversity"),
-          mm_sar_func.turn[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+          mm_sar_func.turn[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
             mutate(beta_facet = "Functional", beta_comp = "Turnover"),
-          mm_sar_func.nest[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+          mm_sar_func.nest[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
             mutate(beta_facet = "Functional", beta_comp = "Nestedness"),
-          mm_sar_func.pnest[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+          mm_sar_func.pnest[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
             mutate(beta_facet = "Functional", beta_comp = "Nestedness proportion")
           ) %>%
   as_tibble()
@@ -249,8 +250,8 @@ env_impor_beta.obs <- bind_rows(mm_sar_spe.total[[1]][1:7, c("variable", "weight
 #  format correlations and change names of environmental variables
 env_impor_beta.obs <- env_impor_beta.obs %>%
   mutate(signif = ifelse(cor.p < 0.001, "***", 
-                         ifelse(cor.p < 0.01 & cor.p > 0.001, "**", 
-                                ifelse(cor.p < 0.05 & cor.p > 0.01, "*", ""))),
+                         ifelse(cor.p < 0.01 & cor.p >= 0.001, "**", 
+                                ifelse(cor.p < 0.05 & cor.p >= 0.01, "*", ""))),
          cor_signif = paste0(round(ps.cor, 2), signif),
          variable = case_when(variable == "mat.anomaly" ~ "Temp_anomaly",
                               variable == "map.anomaly" ~ "Prec_anomaly",
@@ -258,10 +259,11 @@ env_impor_beta.obs <- env_impor_beta.obs %>%
                               variable == "map" ~ "MAP",
                               variable == "ts" ~ "Temp_seas.",
                               variable == "ps" ~ "Prec_seas.",
-                              variable == "log_topo" ~ "Elev_range")) %>%
+                              variable == "log_topo" ~ "Elev_range", 
+                              variable == "sqrt_hmi" ~ "Human_modif.")) %>%
   mutate(beta_facet = factor(beta_facet, levels = c("Taxonomic", "Phylogenetic", "Functional")),
          beta_comp = factor(beta_comp, levels = c("Total beta-diversity", "Turnover", "Nestedness", "Nestedness proportion")),
-         variable = factor(variable, levels = c("Temp_anomaly", "Prec_anomaly", "MAT" ,"MAP", "Temp_seas.", "Prec_seas.", "Elev_range"))) 
+         variable = factor(variable, levels = c("Temp_anomaly", "Prec_anomaly", "MAT" ,"MAP", "Temp_seas.", "Prec_seas.", "Elev_range", "Human_modif."))) 
 
 # generate figure
 beta_comp_color <- c("Total beta-diversity" = "#1B9E77", "Turnover" = "#7570B3", "Nestedness" = "#D95F02","Nestedness proportion" = "#E6AB02")
@@ -280,7 +282,7 @@ ggplot(env_impor_beta.obs) +
         axis.text.y = element_text(size = 8, colour = "black"),
         strip.text = element_text(size = 8))
   
-ggsave(file="results/Fig.S_importance_envs_observed_beta.png", unit="mm",width=150, height=150)
+ggsave(file="results/Fig.S_importance_envs_observed_beta.png", unit="mm",width=150, height=160)
 
 
 ## organize correlations between beta-diversity measures and environmental variables, 
@@ -298,13 +300,13 @@ write.csv(table_cor_betaobs, file = "results/Table.S_correlation_obs.beta_envs.c
 # deviation of phylogenetic and functional turnover and nestedness; and show them as a figure and a table 
 
 # extract weights and correlations from model resul tables
-env_impor_beta.dev <- bind_rows(mm_sar_phylo.dev.turn[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+env_impor_beta.dev <- bind_rows(mm_sar_phylo.dev.turn[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
                                   mutate(beta_facet = "Phylogenetic", beta_comp = "Deviation of turnover"),
-                                mm_sar_phylo.dev.nest[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+                                mm_sar_phylo.dev.nest[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
                                   mutate(beta_facet = "Phylogenetic", beta_comp = "Deviation of nestedness"),
-                                mm_sar_func.dev.turn[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+                                mm_sar_func.dev.turn[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
                                   mutate(beta_facet = "Functional", beta_comp = "Deviation of turnover"),
-                                mm_sar_func.dev.nest[[1]][1:7, c("variable", "weight", "ps.cor", "cor.p")] %>% 
+                                mm_sar_func.dev.nest[[1]][1:8, c("variable", "weight", "ps.cor", "cor.p")] %>% 
                                   mutate(beta_facet = "Functional", beta_comp = "Deviation of nestedness")
                                 ) %>%
   as_tibble()
@@ -312,8 +314,8 @@ env_impor_beta.dev <- bind_rows(mm_sar_phylo.dev.turn[[1]][1:7, c("variable", "w
 #  format correlations and change names of environmental variables
 env_impor_beta.dev <- env_impor_beta.dev %>%
   mutate(signif = ifelse(cor.p < 0.001, "***", 
-                         ifelse(cor.p < 0.01 & cor.p > 0.001, "**", 
-                                ifelse(cor.p < 0.05 & cor.p > 0.01, "*", ""))),
+                         ifelse(cor.p < 0.01 & cor.p >= 0.001, "**", 
+                                ifelse(cor.p < 0.05 & cor.p >= 0.01, "*", ""))),
          cor_signif = paste0(round(ps.cor, 2), signif),
          variable = case_when(variable == "mat.anomaly" ~ "Temp_anomaly",
                               variable == "map.anomaly" ~ "Prec_anomaly",
@@ -321,10 +323,11 @@ env_impor_beta.dev <- env_impor_beta.dev %>%
                               variable == "map" ~ "MAP",
                               variable == "ts" ~ "Temp_seas.",
                               variable == "ps" ~ "Prec_seas.",
-                              variable == "log_topo" ~ "Elev_range")) %>%
+                              variable == "log_topo" ~ "Elev_range", 
+                              variable == "sqrt_hmi" ~ "Human_modif.")) %>%
   mutate(beta_facet = factor(beta_facet, levels = c("Phylogenetic", "Functional")),
          beta_comp = factor(beta_comp, levels = c("Deviation of turnover", "Deviation of nestedness")),
-         variable = factor(variable, levels = c("Temp_anomaly", "Prec_anomaly", "MAT" ,"MAP", "Temp_seas.", "Prec_seas.", "Elev_range"))) 
+         variable = factor(variable, levels = c("Temp_anomaly", "Prec_anomaly", "MAT" ,"MAP", "Temp_seas.", "Prec_seas.", "Elev_range", "Human_modif."))) 
 
 # generate figure
 beta_comp_color <- c("Deviation of turnover" = "#7570B3", "Deviation of nestedness" = "#D95F02")
@@ -343,7 +346,7 @@ ggplot(env_impor_beta.dev) +
         axis.text.y = element_text(size = 8, colour = "black"),
         strip.text = element_text(size = 8))
 
-ggsave(file="results/Fig.S_importance_envs_beta_deviation.png", unit="mm",width=100, height=100)
+ggsave(file="results/Fig.S_importance_envs_beta_deviation.png", unit="mm",width=100, height=105)
 
 
 ## organize correlations between beta-diversity measures and environmental variables, 
@@ -397,26 +400,29 @@ land_bhm <- land_bhm[land_bhm$area>500, ]
 
 # the variables to map 
 env200_2map <- beta_env %>%
-  dplyr::select(ID, mat.anomaly, map.anomaly, mat, map, ts, ps, topo) %>%
+  dplyr::select(ID, mat.anomaly, map.anomaly, mat, map, ts, ps, topo, hmi) %>%
   as.data.frame()
 
 main.titles <- c("A Temperature anomaly since LGM", "B Precipitation anomaly since LGM", 
                  "C Mean annual temperature","D Mean annual precipitation",
                  "E Temperature seasonality","F Precipitation seasonality",
-                 "G Elevation range")
+                 "G Elevation range", "H Human modification")
 
 # self_defined breaks for two map and elev_range
 breaks.map <- c(0,800,1600,2400,3300)
 breaks.eler <- c(0,1300,2600,3900,5200)
+breaks.hmi <- c(0,0.1,0.4,0.7,1)
 
 # generate maps
 env.maps <- list()
-for(i in c(1:7)){
+for(i in c(1:8)){
   breaks <- NULL
   if(i==4) breaks <- breaks.map
   if(i==7) breaks <- breaks.eler
+  if(i==8) breaks <- breaks.hmi
+  digits =  ifelse(i == 8, 2, 0)
   env.map <- mytmap(myraster=raster_cells, myvalue=env200_2map[, c(1, i+1)], polygons=land_bhm, breaks=breaks, break.type="linear", mymidpoint="auto", 
-                    digits=0, limit=0, cols=NULL, style="cont", 
+                    digits=digits, limit=0, cols=NULL, style="cont", 
                     main.title=main.titles[i], main.title.size=0.7, main.title.position=0.1,
                     legend.position=c(0.08, 0.01), legend.height=-0.6, legend.text.size=0.6)
   env.maps[[i]] <- env.map
@@ -433,7 +439,40 @@ breaks.amomaly <- c(0, 7, 14, 21, 28, 35)
 map_anomaly <- mytmap(myraster=raster_cells, myvalue=mat_anomaly[, c(1, 2)], polygons=land_bhm, breaks=breaks.amomaly, mymidpoint="auto", 
        digits=0, limit=0, cols=divPalette(100, "RdYlBu")[100:1], style="cont", 
        legend.position=c(0.08, 0.01), legend.height=-0.6, legend.text.size=0.6)
-tmap_save(map_anomaly, file="results/Fig.S_temp_amomaly_map1.png", unit="mm", width=120, height=50, dpi = 1200)
+tmap_save(map_anomaly, file="results/Fig.S_temp_amomaly_map.png", unit="mm", width=120, height=50, dpi = 1200)
+tmap_save(map_anomaly, file="results/Fig.S_temp_amomaly_map.pdf", unit="mm", width=120, height=50)
+tmap_save(map_anomaly, file="results/Fig.S_temp_amomaly_map.svg", unit="mm", width=120, height=50)
+
+
+##############################
+## Maps showing differences between phylogenetic and functional beta-diversity
+
+diff_beta_phylo_func <- bind_cols(beta_env[, 1], beta_env[,13:16] - beta_env[, 17:20]) %>%
+  rename(total = phylo.beta.total, turnover = phylo.beta.turn, nest = phylo.beta.nest, pnest =phylo.pnest) %>%
+  as.data.frame()
+
+
+# Generate maps
+titles <- c("A Differences between phylogenetic and functional total",
+            "B Differences between phylogenetic and functional turnover",
+            "C Differences between phylogenetic and functional nestedness",
+            "D Differences between phylogenetic and functional nestedness proportion")
+
+# generate maps
+beta.maps <- list()
+
+for(i in c(1:4)){
+  beta.map <- mytmap(myraster=raster_cells, myvalue=diff_beta_phylo_func[,c(1, i+1)], polygons=land_bhm, 
+                     break.type="linear", mymidpoint=0, 
+                     digits=2, limit=0, style="cont",inner.margins=c(0.01,0,0.17,0), 
+                     title=titles[i], title.size=0.7, title.position = c(0.10, 0.92),
+                     legend.position=c(0.05, 0.01), legend.height=-0.6, legend.text.size=0.6)
+  beta.maps[[i]] <- beta.map
+}
+
+# save figure
+beta.maps <- tmap_arrange(beta.maps, nrow=2, ncol=2, outer.margins=0)
+tmap_save(beta.maps, file="results/Fig.S_diff_beta_phylo_func_maps.png", unit="mm", width=180, height=80)
 
 
 
@@ -443,12 +482,29 @@ tmap_save(map_anomaly, file="results/Fig.S_temp_amomaly_map1.png", unit="mm", wi
 # calculate species richness
 tree_sprich <- data.frame(ID = as.numeric(rownames(tree_pam6[[1]])), sprich = apply(tree_pam6[[1]][, -c(1:2)], 1, sum))
 
+tree_angio_sprich <- data.frame(ID = as.numeric(rownames(tree_pam6_gymno[[1]])), sprich = apply(tree_pam6_gymno[[1]][, -c(1:2)], 1, sum))
+
 # generate the map
 map_richness <- mytmap(myraster=raster_cells, myvalue=tree_sprich, polygons=land_bhm, breaks=NULL, break.type="log.linear", mymidpoint="auto", 
        digits=0, limit=0, cols=NULL, style="cont", 
        legend.position=c(0.08, 0.01), legend.height=-0.6, legend.text.size=0.6)
 
 tmap_save(map_richness, file="results/Fig.S_species_richness.png", unit="mm", width=120, height=50, dpi = 300)
+
+# the map for both angiosperms and gymnosperms
+map_richness <- mytmap(myraster=raster_cells, myvalue=tree_sprich, polygons=land_bhm, breaks=NULL, break.type="log.linear", mymidpoint="auto", 
+                             digits=0, limit=0, cols=NULL, style="cont", inner.margins=c(0.01,0,0.15,0), 
+                             title="A Angiosperms", title.size=0.7, title.position = c(0.10, 0.90),
+                             legend.position=c(0.07, 0.01), legend.height=-0.6, legend.text.size=0.6)
+
+map_angio_richness <- mytmap(myraster=raster_cells, myvalue=tree_angio_sprich, polygons=land_bhm, breaks=NULL, break.type="log.linear", mymidpoint="auto", 
+                             digits=0, limit=0, cols=NULL, style="cont", inner.margins=c(0.01,0,0.15,0), 
+                             title="B Gymnosperms", title.size=0.7, title.position = c(0.10, 0.90),
+                             legend.position=c(0.07, 0.01), legend.height=-0.6, legend.text.size=0.6)
+
+maps_richness <- tmap_arrange(map_richness, map_angio_richness, 
+                               nrow=2, ncol=1, outer.margins=0)
+tmap_save(maps_richness, file="results/Fig.S_species_richness_angiosperm_gymnosperm.png",unit="mm",width=90, height=80)
 
 
 
@@ -457,8 +513,8 @@ tmap_save(map_richness, file="results/Fig.S_species_richness.png", unit="mm", wi
 
 # the used environmental variables
 env200_2cor <- beta_env %>%
-  dplyr::select(longitude, latitude, mat.anomaly, map.anomaly, mat, map, ts, ps, log_topo) %>%
-  set_names(c("longitude", "latitude","Temp_anomaly", "Prec_anomaly", "MAT","MAP","Temp_seas.","Prec_seas.","Elev_range")) %>%
+  dplyr::select(longitude, latitude, mat.anomaly, map.anomaly, mat, map, ts, ps, log_topo, sqrt_hmi) %>%
+  set_names(c("longitude", "latitude","Temp_anomaly", "Prec_anomaly", "MAT","MAP","Temp_seas.","Prec_seas.","Elev_range", "Human_modif.")) %>%
   as.data.frame()
 
 # get upper triangle of the correlation matrix
@@ -488,8 +544,8 @@ env200_cor <- env200_cor %>%
                             ifelse(pvalue<= 0.01 & pvalue> 0.001, paste0(cor_values, '*"**"'),
                                    ifelse(pvalue<= 0.05 & pvalue> 0.01, paste0(cor_values, '*"*"'),
                                           cor_values)))) %>%
-  mutate(variable1 = factor(variable1, levels = c("Temp_anomaly", "Prec_anomaly", "MAT","MAP","Temp_seas.","Prec_seas.","Elev_range")),
-         variable2 = factor(variable2, levels = c("Temp_anomaly", "Prec_anomaly", "MAT","MAP","Temp_seas.","Prec_seas.","Elev_range")))
+  mutate(variable1 = factor(variable1, levels = c("Temp_anomaly", "Prec_anomaly", "MAT","MAP","Temp_seas.","Prec_seas.","Elev_range","Human_modif.")),
+         variable2 = factor(variable2, levels = c("Temp_anomaly", "Prec_anomaly", "MAT","MAP","Temp_seas.","Prec_seas.","Elev_range","Human_modif.")))
 
 ggplot(data = env200_cor, aes(variable2, variable1,  fill = cor_values))+
   geom_tile(color = "black") +
@@ -510,8 +566,7 @@ ggplot(data = env200_cor, aes(variable2, variable1,  fill = cor_values))+
   guides(fill = guide_colorbar(barwidth = 5, barheight = 0.8,
                                title.position = "top", title.hjust = 0.5))	
 
-ggsave(file="results/Fig.S_correlation_environments.png", unit="mm", width=100, height=90)
-
+ggsave(file="results/Fig.S_correlation_environments.png", unit="mm", width=110, height=100)
 
 
 ###################
@@ -652,3 +707,4 @@ ggplot(status_range1) +
         axis.text = element_text(size = 8, colour = "black"))
 
 ggsave(file="results/Fig.S_histogram_nocc.png", unit="mm",width=80, height=80)
+
