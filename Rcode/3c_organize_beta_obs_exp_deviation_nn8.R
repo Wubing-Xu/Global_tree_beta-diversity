@@ -1,5 +1,5 @@
 ##################################################################################################################
-## Organize observed and expected three facets of beta-diversity within regions of 3*4 grid-cells (8 nearest neighboring cells around the focal),
+## Organize observed and expected three facets of beta-diversity within regions of 3*3 grid-cells (8 nearest neighboring cells around the focal),
 # and then calculate the deviation between the observed and expected phylogenetic and functional beta-diversity
 ##################################################################################################################
 

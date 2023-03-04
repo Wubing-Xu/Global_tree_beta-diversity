@@ -369,7 +369,7 @@ trait_obs <- trait_obs %>% dplyr::filter(species %in% tree$tip.label)
 phylosig_sample <- function(trait_obs = trait_obs, trait_pre = trait, tree = tree){
   trait_name <- unique(trait_obs$trait_name)
   phylosig_pre <- data.frame(trait_name = trait_name, 
-                             lambda = NA, lambda_P = NA, K = NA, K_P = NA)
+                             lambda = NA, lambda_P = NA)
   for(i in 1:length(trait_name)){
     # the imputed trait values
     trait_pre_sub <- trait_pre %>% pull(trait_name[i])
@@ -379,11 +379,8 @@ phylosig_sample <- function(trait_obs = trait_obs, trait_pre = trait, tree = tre
     trait_values_sample <- sample(trait_values, nspp_obs)
     # calculate phylogenetic signals
     lambda_trait <- phylosig(tree, trait_values_sample, method="lambda", test=TRUE)
-    K_trait <- phylosig(tree, trait_values_sample, method="K", test=TRUE)
     phylosig_pre[i, "lambda"] <- lambda_trait$lambda
     phylosig_pre[i, "lambda_P"] <- lambda_trait$P
-    phylosig_pre[i, "K"] <- K_trait$K
-    phylosig_pre[i, "K_P"] <- K_trait$P
     print(i)
   }
   return(phylosig_pre)
@@ -408,17 +405,14 @@ stopCluster(cl)
 # calculate the phylogenetic signal of traits before imputation
 # a data frame to save phylogenetic signals
 trait_phylosig <- data.frame(trait_name = unique(trait_obs$trait_name), 
-                             lambda = NA, lambda_P = NA, K = NA, K_P = NA)
+                             lambda = NA, lambda_P = NA)
 
 for(i in 1:8){
   trait_obs_sub <- trait_obs %>% dplyr::filter(trait_name == trait_phylosig[i, 1])
   trait_obs_values <- setNames(trait_obs_sub$trait_values, trait_obs_sub$species)
   lambda_trait <- phylosig(tree, trait_obs_values, method="lambda", test=TRUE)
-  K_trait <- phylosig(tree, trait_obs_values, method="K", test=TRUE)
   trait_phylosig[i, "lambda"] <- lambda_trait$lambda
   trait_phylosig[i, "lambda_P"] <- lambda_trait$P
-  trait_phylosig[i, "K"] <- K_trait$K
-  trait_phylosig[i, "K_P"] <- K_trait$P
   print(i)
 }
 
@@ -433,10 +427,7 @@ phylosig_pre_trait_summary <- phylosig_pre_trait %>%
   group_by(trait_name) %>%
   summarise(lambda_mean = mean(lambda),
             lambda_sd = sd(lambda),
-            n_lambda_sig = sum(lambda_P<0.001),
-            K_mean = mean(K),
-            K_sd = sd(K),
-            n_K_sig = sum(K_P<0.05))
+            n_lambda_sig = sum(lambda_P<0.001))
 
 # format phylogenetic signals.
 # Choose Pagel's lambda as this metric seems more robust to polytomis (Molina-Venegas and Rodriguez, 2017).
